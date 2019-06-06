@@ -2,6 +2,7 @@
 #include<cstdint>
 #include<atomic>
 #include<vector>
+#include<cassert>
 #ifndef STORAGE_KAISADB_AREA_H_
 
 
@@ -29,13 +30,7 @@ private:
     std::atomic<size_t> memory_usage_;
 };
 
-Area::Area(/* args */)
-{
-}
 
-Area::~Area()
-{
-}
 
 
 }  //namespace kaisadb

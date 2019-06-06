@@ -1,4 +1,4 @@
-#include "util/area.h"
+#include "area.h"
 
 namespace kaisadb {
 
@@ -6,6 +6,11 @@ static const int kBlockSize = 4096;
 
 Area::Area():alloc_ptr_(nullptr),alloc_size_remaining_(0),memory_usage_(0){
 
+}
+Area::~Area() {
+    for(size_t i=0;i<blocks_.size();i++){
+        delete[] blocks_[i];
+    }
 }
 inline char* Area::Allocate(size_t bytes)
 {
