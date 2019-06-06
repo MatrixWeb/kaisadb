@@ -19,6 +19,8 @@ public:
     char* AllocateAligned(size_t bytes);
     ~Area();
 private:
+    char* AllockFallBack(size_t bytes);
+    char* AllocateNewBlock(size_t block_bytes);
     //Allocation state
     char* alloc_ptr_;
     size_t alloc_size_remaining_;
