@@ -16,9 +16,10 @@ private:
 public:
     Arena(/* args */);
     Arena(const Arena&) = delete;
+    Arena& operator=(const Arena&) = delete;
     char* Allocate(size_t bytes);
     char* AllocateAligned(size_t bytes);
-    ~Area();
+    ~Arena();
 private:
     char* AllockFallBack(size_t bytes);
     char* AllocateNewBlock(size_t block_bytes);

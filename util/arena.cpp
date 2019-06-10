@@ -24,6 +24,23 @@ inline char* Arena::Allocate(size_t bytes)
     return AllockFallBack(bytes);
 }
 
+char* Arena::AllocateAligned(size_t bytes){
+    const int align = (sizeof(void *)>8)?(sizeof(void *)):8;
+    size_t current_mod = reinterpret_cast<uintptr_t>(alloc_ptr_) & (align-1);
+    size_t slop = (current_mod == 0) ? 0:(align-current_mod);
+    size_t needed = bytes+slop;
+    char* result;
+    if(needed< alloc_size_remaining_){
+        result = alloc_ptr_+slop;
+        alloc_ptr_+=needed;
+        alloc_size_remaining_-=needed;
+    }else{
+        result = AllockFallBack(bytes);
+    }
+    assert((reinterpret_cast<uintptr_t>(result)&(align-1))==0);
+    return result;
+}
+
 char* Arena::AllockFallBack(size_t bytes){
     if(bytes > kBlockSize/4){
         char* result=AllocateNewBlock(bytes);
