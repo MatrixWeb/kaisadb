@@ -30,7 +30,17 @@ private:
     std::vector<char*> blocks_;
     std::atomic<size_t> memory_usage_;
 };
-
+inline char* Arena::Allocate(size_t bytes)
+{
+    assert(bytes>0);
+    if(bytes<alloc_size_remaining_){
+        char* result=alloc_ptr_;
+        alloc_ptr_+=bytes;
+        alloc_size_remaining_-=bytes;
+        return result;
+    }
+    return AllockFallBack(bytes);
+}
 
 
 

@@ -12,17 +12,7 @@ Arena::~Arena() {
         delete[] blocks_[i];
     }
 }
-inline char* Arena::Allocate(size_t bytes)
-{
-    assert(bytes>0);
-    if(bytes<alloc_size_remaining_){
-        char* result=alloc_ptr_;
-        alloc_ptr_+=bytes;
-        alloc_size_remaining_-=bytes;
-        return result;
-    }
-    return AllockFallBack(bytes);
-}
+
 
 char* Arena::AllocateAligned(size_t bytes){
     const int align = (sizeof(void *)>8)?(sizeof(void *)):8;
