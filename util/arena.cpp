@@ -1,18 +1,18 @@
-#include "area.h"
+#include "arena.h"
 
 namespace kaisadb {
 
 static const int kBlockSize = 4096;
 
-Area::Area():alloc_ptr_(nullptr),alloc_size_remaining_(0),memory_usage_(0){
+Arena::Arena():alloc_ptr_(nullptr),alloc_size_remaining_(0),memory_usage_(0){
 
 }
-Area::~Area() {
+Arena::~Arena() {
     for(size_t i=0;i<blocks_.size();i++){
         delete[] blocks_[i];
     }
 }
-inline char* Area::Allocate(size_t bytes)
+inline char* Arena::Allocate(size_t bytes)
 {
     assert(bytes>0);
     if(bytes<alloc_size_remaining_){
@@ -24,7 +24,7 @@ inline char* Area::Allocate(size_t bytes)
     return AllockFallBack(bytes);
 }
 
-char* Area::AllockFallBack(size_t bytes){
+char* Arena::AllockFallBack(size_t bytes){
     if(bytes > kBlockSize/4){
         char* result=AllocateNewBlock(bytes);
         return result;
@@ -37,7 +37,7 @@ char* Area::AllockFallBack(size_t bytes){
     return result;
 }
 
-char* Area::AllocateNewBlock(size_t block_bytes){
+char* Arena::AllocateNewBlock(size_t block_bytes){
     char* result=new char[block_bytes];
     blocks_.push_back(result);
     memory_usage_.fetch_add(block_bytes+sizeof(char*),std::memory_order_relaxed);

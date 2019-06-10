@@ -9,13 +9,13 @@
 #define STORAGE_KAISADB_AREA_H_
 namespace kaisadb {
 
-class Area
+class Arena
 {
 private:
     /* data */
 public:
-    Area(/* args */);
-    Area(const Area&) = delete;
+    Arena(/* args */);
+    Arena(const Arena&) = delete;
     char* Allocate(size_t bytes);
     char* AllocateAligned(size_t bytes);
     ~Area();
