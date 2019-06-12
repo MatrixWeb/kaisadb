@@ -1,12 +1,11 @@
+#ifndef STORAGE_KAISADB_AREA_H_
+#define STORAGE_KAISADB_AREA_H_
+
 #include<cstddef>
 #include<cstdint>
 #include<atomic>
 #include<vector>
 #include<cassert>
-#ifndef STORAGE_KAISADB_AREA_H_
-
-
-#define STORAGE_KAISADB_AREA_H_
 namespace kaisadb {
 
 class Arena
