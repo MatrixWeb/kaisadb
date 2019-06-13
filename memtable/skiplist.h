@@ -24,6 +24,9 @@ private:
 
     bool KeyIsAfterNode(const Key& key, Node* n)const;
     Node* FindGreaterOrEqual(const Key& key , Node** prev)const;
+    inline int GetMaxHeight()const {
+        return max_height_.load(std::memory_order_relaxed);
+    }
 
     Comparator const compare_;
     std::atomic<int> max_height_;
@@ -93,7 +96,21 @@ bool SkipList<Key,Comparator>::KeyIsAfterNode(const Key& key, Node* n) const {
 template <typename Key , class Comparator>
 typename SkipList<Key,Comparator>::Node*
 SkipList<Key,Comparator>::FindGreaterOrEqual(const Key& key , Node** prev)const {
-    
+    Node* x = head_;
+    int level =  GetMaxHeight() - 1;
+    while(true){
+        Node* next = x->Next(level);
+        if(KeyIsAfterNode(key,next)){
+            x=next;
+        }else{
+            if(prev!=nullptr)prev[level]=x;
+            if(level==0){
+                return x;
+            }else{
+                level--;
+            }
+        }
+    }
 }
 
 
