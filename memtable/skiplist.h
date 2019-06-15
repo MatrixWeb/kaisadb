@@ -6,7 +6,7 @@
 #include "util/arena.h"
 #include "util/random.h"
 
-
+namespace kaisadb {
 template <typename Key , class Comparator>
 class SkipList {
 
@@ -17,13 +17,18 @@ public:
     explicit SkipList(Comparator cmp, Arena* arena);
     SkipList(const SkipList&) = delete;
     SkipList& operator=(const SkipList&) = delete;
+    void Insert(const Key& key);
+    bool Contains(const Key& key) const;
 private:
     enum { kMaxHeight = 12 };
     Node* NewNode(const Key& key, int height);
     int RandomHeight();
+    bool Equal(const Key& a ,const Key& b) const { return (compare_(a,b) == 0);}
 
     bool KeyIsAfterNode(const Key& key, Node* n)const;
     Node* FindGreaterOrEqual(const Key& key , Node** prev)const;
+    Node* FindLessThan(const Key& key) const;
+    Node* FindLast() const;
     inline int GetMaxHeight()const {
         return max_height_.load(std::memory_order_relaxed);
     }
@@ -111,6 +116,85 @@ SkipList<Key,Comparator>::FindGreaterOrEqual(const Key& key , Node** prev)const 
             }
         }
     }
+}
+
+template <typename Key , class Comparator>
+typename SkipList<Key,Comparator>::Node*
+SkipList<Key,Comparator>::FindLast() const {
+    Node* x = head;
+    int level = GetMaxHeight() - 1;
+    while(true){
+        Node* next = x->Next(level);
+        if(next == nullptr){
+            if(level == 0){
+                return x;
+            }else{
+                level --;
+            }
+        }else{
+            x=next;
+        }
+    }
+}
+
+
+
+template <typename Key , class Comparator>
+typename SkipList<Key,Comparator>::Node*
+SkipList<Key,Comparator>::FindLessThan(const Key& key) const {
+    Node* x =head;
+    int level = GetMexHeight();
+    while(true){
+        Node* next = x->Next(level);
+        if(next == nullptr || compare_(next->key , key)>=0){
+            if(level == 0)
+            {
+                return x;
+            }else{
+                level -- ;
+            }
+        }else{
+            x =next;
+        }
+
+
+    }
+}
+
+template <typename Key , class Comparator>
+void SkipList<Key , Camparator>::Insert(const Key& key){
+    Node* prev[kMaxHeight];
+    Node* x = FindGreaterOrEqual(key , prev);
+
+    int height = RandomHeight();
+
+    if(height > GetMaxHeight()){
+        for(int h = GetMaxHeight();h<kMaxHeight;h++){
+            prev[h]=head_;
+        }
+
+        max_height_.store(height,std::memory_order_relaxed);
+    }
+
+    x = NewNode(key,height);
+
+    for(int i=0; i<height;i++){
+        x->NoBarrier_SetNext(i,prev[i]->NoBarrier_Next(i));
+        prev[i]->SetNext(i,x);
+    }
+
+}
+
+template <typename Key , class Comparator>
+bool SkipList<Key, Comparator>::Contains(const Key& key) const {
+    Node* x = FindGreaterOrEqual(key,nullptr);
+    if(x!=nullptr && Equal(key , x->key)){
+        return true;
+    }else{
+        return false;
+    }
+}
+
 }
 
 
