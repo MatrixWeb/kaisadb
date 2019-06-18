@@ -38,6 +38,31 @@ private:
     Arena* const arena_;
     Node* const head_;
     Random rnd_;
+public:
+
+    class Iterator {
+    public:
+        explicit Iterator(const SkipList* list);
+
+        bool Valid() const;
+
+        const Key& key() const;
+
+        void Next();
+
+        void Prev();
+
+        void Seek(const Key& key);
+
+        void SeekToFirst();
+
+        void SeekToLast();
+
+    private:
+        const SkipList* list_;
+        Node* node_;
+    };
+
 };
 
 template <typename Key , class Comparator>
@@ -195,7 +220,54 @@ bool SkipList<Key, Comparator>::Contains(const Key& key) const {
     }
 }
 
+template <typename Key , class Comparator>
+inline SkipList<Key , Comparator>::Iterator::Iterator(const SkipList* list) {
+    list_ = list;
+    node_ = nullptr;
 }
+
+template <typename Key , class Comparator>
+inline bool SkipList<Key , Comparator>::Iterator::Valid() const {
+    return node_ != nullptr ;
+}
+
+template <typename Key , class Comparator>
+inline const Key& SkipList<Key , Comparator>::Iterator::key(){
+    return node_->key;
+}
+
+template <typename Key , class Comparator>
+inline void SkipList<Key , Comparator>::Iterator::Next(){
+    node_=node_->Next(0);
+}
+
+template <typename Key , class Comparator>
+inline void SkipList<Key , Comparator>::Iterator::Prev(){
+    node_ = list_->FindLessThan(node_->key);
+    if(node_ == list_->head_){
+        node_ = nullptr;
+    }
+}
+
+template <typename Key , class Comparator>
+inline void SkipList<Key , Comparator>::Iterator::Seek(const Key& target){
+    node_ = list_->FindGreaterOrEqual(target,nullptr);
+}
+
+template <typename Key , class Comparator>
+inline void SkipList<Key , Comparator>::Iterator::SeekToFirst(){
+    node_ = list_->head_->Next(0);
+}
+
+template <typename Key , class Comparator>
+inline void SkipList<Key , Comparator>::Iterator::SeekToLast(){
+    node_ = list_->FindLast();
+    if(node_ == list_->head_){
+        node_= nullptr;
+    }
+}
+
+} //namespace kaisadb
 
 
 #endif
