@@ -81,7 +81,7 @@ struct SkipList<Key,Comparator>::Node
         return next_[n].load(std::memory_order_relaxed);
     }
     void NoBarrier_SetNext(int n,Node* x){
-        next[n].store(x,std::memory_order_relaxed);
+        next_[n].store(x,std::memory_order_relaxed);
     }
 private:
     std::atomic<Node*> next_[1];
@@ -89,7 +89,7 @@ private:
 
 
 template <typename Key , class Comparator>
-SkipList<Key, Comparator>::Node* SkipList<Key, Comparator>::NewNode(const Key& key, int height)
+typename SkipList<Key, Comparator>::Node* SkipList<Key, Comparator>::NewNode(const Key& key, int height)
 {
     char* const node_memory = arena_->AllocateAligned(sizeof(Node)+sizeof(std::atomic<Node*>)*(height-1));
     return new (node_memory) Node(key);
@@ -100,7 +100,7 @@ template <typename Key, class Comparator>
 int SkipList<Key, Comparator>::RandomHeight(){
     static const unsigned int kBranching = 4;
     int height=1;
-    while(height<max_height_ && ((rnd_.Next()%kBranching)==0){
+    while(height<max_height_ && ((rnd_.Next()%kBranching)==0)){
         height++;
     }
     return height;
@@ -111,10 +111,10 @@ SkipList<Key, Comparator>::SkipList(Comparator cmp , Arena* arena)
     :compare_(cmp),
     arena_(arena),
     head_(NewNode(0,kMaxHeight)),
-    max_height_=1,
+    max_height_(1),
     rnd_(0xdeadbeef){
-        for(int i=0;i<kMaxHeight;I++){
-            head_.SetNext(i,nullptr);
+        for(int i=0;i<kMaxHeight;i++){
+            head_->SetNext(i,nullptr);
         }
 }
 
@@ -146,7 +146,7 @@ SkipList<Key,Comparator>::FindGreaterOrEqual(const Key& key , Node** prev)const 
 template <typename Key , class Comparator>
 typename SkipList<Key,Comparator>::Node*
 SkipList<Key,Comparator>::FindLast() const {
-    Node* x = head;
+    Node* x = head_;
     int level = GetMaxHeight() - 1;
     while(true){
         Node* next = x->Next(level);
@@ -167,8 +167,8 @@ SkipList<Key,Comparator>::FindLast() const {
 template <typename Key , class Comparator>
 typename SkipList<Key,Comparator>::Node*
 SkipList<Key,Comparator>::FindLessThan(const Key& key) const {
-    Node* x =head;
-    int level = GetMexHeight();
+    Node* x =head_;
+    int level = GetMaxHeight();
     while(true){
         Node* next = x->Next(level);
         if(next == nullptr || compare_(next->key , key)>=0){
@@ -187,7 +187,7 @@ SkipList<Key,Comparator>::FindLessThan(const Key& key) const {
 }
 
 template <typename Key , class Comparator>
-void SkipList<Key , Camparator>::Insert(const Key& key){
+void SkipList<Key , Comparator>::Insert(const Key& key){
     Node* prev[kMaxHeight];
     Node* x = FindGreaterOrEqual(key , prev);
 
@@ -232,7 +232,7 @@ inline bool SkipList<Key , Comparator>::Iterator::Valid() const {
 }
 
 template <typename Key , class Comparator>
-inline const Key& SkipList<Key , Comparator>::Iterator::key(){
+inline const Key& SkipList<Key , Comparator>::Iterator::key() const {
     return node_->key;
 }
 
