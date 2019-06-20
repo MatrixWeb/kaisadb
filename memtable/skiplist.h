@@ -135,7 +135,7 @@ SkipList<Key,Comparator>::FindGreaterOrEqual(const Key& key , Node** prev)const 
         }else{
             if(prev!=nullptr)prev[level]=x;
             if(level==0){
-                return x;
+                return next;
             }else{
                 level--;
             }
